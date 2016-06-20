@@ -338,4 +338,123 @@ describe('router/index.js', function () {
       });
     });
   });
+
+  describe('.absoluteUrlFor()', function () {
+    var absoluteUrlFor;
+    var routeTable;
+    var router;
+    var revert;
+
+    before('initialize table and inject it to router', function () {
+      router = rewire('../index');
+
+      routeTable = {};
+      routeTable['foo'] = {
+        pattern: '/foo',
+        tokens: [{text: ''}, {text: 'foo'}]
+      };
+      routeTable['foo.list'] = {
+        pattern: '/foo',
+        tokens: [{text: ''}, {text: 'foo'}]
+      };
+      routeTable['foo.detail'] = {
+        pattern: '/foo/:input',
+        tokens: [{text: ''}, {text: 'foo'}, {text: 'input', input: true}]
+      };
+      routeTable['foo.list-category'] = {
+        pattern: '/foo/category/:category',
+        tokens: [{text: ''}, {text: 'foo'}, {text: 'category'}, {text: 'category', input: true}]
+      };
+      routeTable['foo.list-category.detail'] = {
+        pattern: '/foo/category/:category/:slug',
+        tokens: [{text: ''}, {text: 'foo'}, {text: 'category'}, {text: 'category', input: true}, {text: 'slug', input: true}]
+      };
+      routeTable['weird.doubled.input'] = {
+        pattern: '/foo/:input/bun/:input',
+        tokens: [{text: ''}, {text: 'foo'}, {text: 'input', input: true}, {text: 'bun'}, {text: 'input', input: true}]
+      };
+
+      revert = router.__set__('routeTable', routeTable);
+      absoluteUrlFor = router.absoluteUrlFor;
+    });
+
+    after('clean up rewire', function () {
+      revert();
+    });
+
+    context('when no baseUrl is set', function () {
+      it('should throw error', function () {
+        expect(function () {
+          absoluteUrlFor('foo');
+        }).to.throw(Error);
+
+        expect(function () {
+          absoluteUrlFor('nope');
+        }).to.throw(Error);
+      });
+    });
+
+    context('when baseUrl is set', function () {
+      var baseUrl;
+
+      before('set base URL', function () {
+        baseUrl = 'http://www.cermati.com';
+        router.setBaseUrl(baseUrl);
+      });
+
+      context('when route does not need any input', function () {
+        it('should return the route normally', function () {
+          expect(absoluteUrlFor('foo')).to.equal(baseUrl + '/foo');
+          expect(absoluteUrlFor('foo.list')).to.equal(baseUrl + '/foo');
+        });
+      });
+
+      context('when route does need some inputs', function () {
+        it('should return the route normally', function () {
+          expect(absoluteUrlFor('foo.detail', {input: 'bar'})).to.equal(baseUrl + '/foo/bar');
+          expect(absoluteUrlFor('foo.list-category', {category: 'troll'})).to.equal(baseUrl + '/foo/category/troll');
+          expect(absoluteUrlFor('foo.list-category.detail', {category: 'orc', slug: 'blade-master'})).to.equal(baseUrl + '/foo/category/orc/blade-master');
+          expect(absoluteUrlFor('weird.doubled.input', {input: 'twin'})).to.equal(baseUrl + '/foo/twin/bun/twin');
+        });
+
+        it('should return throw error when input is incomplete', function () {
+          expect(function () {
+            absoluteUrlFor('foo.list-category', {unknownInput: 'troll'});
+          }).to.throw(Error);
+
+          expect(function () {
+            absoluteUrlFor('foo.list-category.detail', {category: 'one-input-is-missing'});
+          }).to.throw(Error);
+        });
+      });
+
+      context('when given queries', function () {
+        it('should return the url with queries appended in the end', function () {
+          expect(absoluteUrlFor('foo', {}, {})).to.equal(baseUrl + '/foo?');
+          expect(absoluteUrlFor('foo', {}, {bar: 'baz'})).to.equal(baseUrl + '/foo?bar=baz');
+          expect(absoluteUrlFor('foo', {}, {bar: 'baz', 'fuu-uu': 'rage'})).to.equal(baseUrl + '/foo?bar=baz&fuu-uu=rage');
+
+          expect(absoluteUrlFor('foo.list-category', {category: 'ogre'}, {})).to.equal(baseUrl + '/foo/category/ogre?');
+          expect(absoluteUrlFor('foo.list-category', {category: 'ogre'}, {class: 'magi'})).to.equal(baseUrl + '/foo/category/ogre?class=magi');
+          expect(absoluteUrlFor('foo.list-category', {category: 'ogre'}, {class: 'magi', size: 'big'})).to.equal(baseUrl + '/foo/category/ogre?class=magi&size=big');
+
+          expect(absoluteUrlFor('foo', {}, {list: [1, 2, 3]})).to.equal(baseUrl + '/foo?list=1&list=2&list=3');
+        });
+      });
+
+      context('when route name does not exist', function () {
+        it('should throw error', function () {
+          expect(function () {
+            absoluteUrlFor('fuu');
+          }).to.throw(Error);
+        });
+      });
+
+      context('when given falsy parameter', function () {
+        it('should return the url with falsy parameter', function () {
+          expect(absoluteUrlFor('foo.list-category', {category: 0})).to.equal(baseUrl + '/foo/category/0');
+        });
+      });
+    });
+  });
 });
