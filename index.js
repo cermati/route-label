@@ -25,9 +25,67 @@ var util = require('util');
 var helper = require('./helper');
 var constants = require('./constants');
 
+var baseUrl;
 var routeTable;
 var PUSH = constants.PUSH;
 var POP = constants.POP;
+
+// Basic functionality
+var routerBase = {
+  urlFor: urlFor,
+  absoluteUrlFor: absoluteUrlFor,
+  setBaseUrl: setBaseUrl,
+  getRouteTable: getRouteTable
+};
+
+/**
+ * Create a router object, provided the express app
+ * It wraps `add` function defined above, so it can be easier to use
+ *
+ * It adapts express routing structure, can be called with this pattern:
+ * router.METHOD([name], path, [middleware...], middleware)
+ *
+ * @author William Gozali <will.gozali@cermati.com>
+ * Later, we can:
+ *   In routes/index:
+ *   var router = require('../router')(app);
+ *   var article = require('../modules/article');
+ *   router.all('/articles*', middleware.requireLogin); // Just middleware, no name necessary
+ *   router.use('articles', '/articles', article.routes);
+ *
+ *   In article/index module:
+ *   var express = keystone.express;
+ *   var app = express();
+ *   var router = require('../../router')(app);
+ *   router.get('list', '/', require('./views/list'));
+ *   router.get('detail', '/:title', require('./views/detail'));
+ *   router.post('save', '/:title', middleware.requireAdmin, require('./views/save')); // Can add middleware
+ */
+var router = function (app) {
+  var router = routerBase;
+
+  _.each(routerBase, function (value, key) {
+    router[key] = value;
+  });
+
+  constants.METHODS.forEach(function (method) {
+    router[method] = add.bind(null, method, app);
+  });
+
+  router.use = add.bind(null, 'use', app);
+  router.all = add.bind(null, 'all', app);
+  router.buildRouteNames = buildRouteNames.bind(null, app);
+
+  return router;
+};
+
+// If "required" without invoking `(app)`, simply attach basic functionalities to returned constructor
+_.each(routerBase, function (value, key) {
+  router[key] = value;
+});
+
+module.exports = router;
+
 
 /**
  * Generic method to register a route, for any method (get, post, all, ...)
@@ -126,16 +184,16 @@ function add() {
  * Example for the generated routeTable:
  *   routeTable['article.list'].pattern = '/artikel'
  *   routeTable['article.list'].tokens = [
- *   {text: ''},
- *   {text: 'artikel'}
+ *     {text: ''},
+ *     {text: 'artikel'}
  *   ]
  *
  *   routeTable['article.category'].pattern = '/artikel/kategori/:category'
  *   routeTable['article.category'].tokens = [
- *   {text: ''}
- *   {text: 'artikel'},
- *   {text: 'kategori'},
- *   {text: 'category', input: true}
+ *     {text: ''}
+ *     {text: 'artikel'},
+ *     {text: 'kategori'},
+ *     {text: 'category', input: true}
  *   ]
  * @author William Gozali <will.gozali@cermati.com>
  * @param app - The express app
@@ -169,7 +227,7 @@ function buildRouteNames(app) {
       }
 
       if (stack.length === 0) {
-        throw new Error('Stack in generating route names is not balanced');
+        throw new Error('Stack in generating route names is not balanced, please report this issue');
       }
 
       stack.pop();
@@ -179,7 +237,7 @@ function buildRouteNames(app) {
   }
 
   if (stack.length !== 0) {
-    throw new Error('Leftover element exists in the stack while generating route names');
+    throw new Error('Leftover element exists in the stack while generating route names, please report this issue');
   }
 }
 
@@ -243,46 +301,6 @@ function urlFor(routeName, params, queries) {
 }
 
 /**
- * Create a router object, provided the express app
- * It wraps `add` function defined above, so it can be easier to use
- *
- * It adapts express routing structure, can be called with this pattern:
- * router.METHOD([name], path, [callback...], callback)
- *
- * @author William Gozali <will.gozali@cermati.com>
- * Later, we can:
- *   In routes/index:
- *   var router = require('../router')(app);
- *   var article = require('../modules/article');
- *   router.all('/articles*', middleware.requireLogin); // Just middleware, no name necessary
- *   router.use('articles', '/articles', article.routes);
- *
- *   In article/index module:
- *   var express = keystone.express;
- *   var app = express();
- *   var router = require('../../router')(app);
- *   router.get('list', '/', require('./views/list'));
- *   router.get('detail', '/:title', require('./views/detail'));
- *   router.post('save', '/:title', middleware.requireAdmin, require('./views/save')); // Can add middleware
- */
-var route = function createRouter(app) {
-  return {
-    buildRouteNames: buildRouteNames.bind(null, app),
-    urlFor: urlFor,
-    get: add.bind(null, 'get', app),
-    post: add.bind(null, 'post', app),
-    put: add.bind(null, 'put', app),
-    head: add.bind(null, 'head', app),
-    all: add.bind(null, 'all', app),
-    delete: add.bind(null, 'delete', app),
-    use: add.bind(null, 'use', app)
-  };
-};
-
-// Attach additional fields which can be used without passing `app`
-route.urlFor = urlFor;
-
-/**
  * Creates an absolute url for the given routeName, params, and queries.
  *
  * @example
@@ -295,21 +313,33 @@ route.urlFor = urlFor;
  * @param {Object} [queries] - Queries to be appended in the end of url.
  * @returns {string}
  */
-route.absoluteUrlFor = function (routeName, params, queries) {
-  return process.env.BASE_URL.concat(urlFor(routeName, params, queries));
-};
+function absoluteUrlFor(routeName, params, queries) {
+  if (!baseUrl) {
+    throw new Error('Please set baseUrl with .setBaseUrl before!');
+  }
+
+  return baseUrl.concat(urlFor(routeName, params, queries));
+}
 
 /**
- * TODO: DOC
- * @returns {{}}
+ * Set base URL so later we can call `absoluteUrlFor`
+ * @author William Gozali <will.gozali@cermati.com>
+ * @param _baseUrl
  */
-route.getRouteTable = function () {
+function setBaseUrl(_baseUrl) {
+  baseUrl = _baseUrl;
+}
+
+/**
+ * Return object with route name as keys and the pattern as values
+ * @author William Gozali <will.gozali@cermati.com>
+ * @returns {Object}
+ */
+function getRouteTable() {
   var table = {};
   _.keys(routeTable).forEach(function (key) {
     table[key] = routeTable[key].pattern;
   });
 
   return table;
-};
-
-module.exports = route;
+}
