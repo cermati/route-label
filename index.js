@@ -1,0 +1,315 @@
+/**
+ * Module to track defined routing and their naming
+ * This will build a route name table by traversing the routes hierarchy, starting from routes/index
+ * The result will be stored as singleton object, routeTable
+ *
+ * This pattern is used in:
+ * https://github.com/alexmingoia/koa-router
+ * https://github.com/alubbe/named-routes
+ *
+ * Sadly, none of them can be used for our modular architecture in express.js
+ * 1. var router = require('/path/to/this/router')(app);
+ * 2. var router = require('/path/to/this/router');
+ *
+ * When mode 1 is used, router can register route (.get, .post, ...), buildRouteNames, and urlFor
+ * When mode 2 is used, router can only do urlFor(...)
+ * @author William Gozali <will.gozali@cermati.com>
+ */
+
+'use strict';
+
+var _ = require('lodash');
+var querystring = require('querystring');
+var util = require('util');
+
+var helper = require('./helper');
+var constants = require('./constants');
+
+var routeTable;
+var PUSH = constants.PUSH;
+var POP = constants.POP;
+
+/**
+ * Generic method to register a route, for any method (get, post, all, ...)
+ * It wraps around express' routing function, and jot down the routing hierarchy
+ *
+ * Takes arguments with pattern:
+ * method, app, [name,] path, [middleware...,] routeController
+ *
+ * Where:
+ *   method - Routing method, like 'get', 'post', or special 'use'
+ *   app - A keystone.express instance
+ *   name - Name of this particular route. Without name, this route and its children won't be registered to routeTable.
+ *      You can skip this parameter when registering middleware (eg: middleware.requireLogin)
+ *   path - Path for this particular route (eg: '/article', '/article/:slug')
+ *   middleware - Sequences of middleware. This is optional
+ *   routeController - The controller to handle this route, can also be middleware
+ * @author William Gozali <will.gozali@cermati.com>
+ */
+function add() {
+  var args = _.values(arguments);
+
+  var method = args[0];
+  var app = args[1];
+  var name;
+  var path;
+  var offset;
+  var middlewares;
+
+  if (_.isString(args[3])) {
+    // Name is provided
+    name = args[2];
+    path = args[3];
+    offset = 4;
+
+    if (!helper.isValidName(name)) {
+      throw new Error('Invalid route name: ' + name);
+    }
+    if (!helper.isValidPathForNamedRoute(path)) {
+      throw new Error('Invalid path for named route: ' + path + ', it won\'t make sense for urlFor');
+    }
+  } else {
+    // No name provided
+    path = args[2];
+    offset = 3;
+  }
+  middlewares = _.flattenDeep(args.slice(offset));
+
+  if (!app.routeTraversal) {
+    // Singleton for each app
+    app.routeTraversal = [];
+  }
+
+  // Prepare to get deeper
+  if (name) {
+    app.routeTraversal.push({
+      operation: PUSH,
+      name: name,
+      path: path
+    });
+  }
+
+  // Register this for express to do its stuff
+  app[method](path, middlewares);
+
+  var routeController = _.last(middlewares);
+  if (_.isArray(routeController.routeTraversal)) {
+    /*
+     As with our function signature, the last element of the middlewares is assumed to be
+     the "handler" for the controller logic.
+     Even if it is not (could be just a middleware for login guard), then routeController.routeTraversal
+     is guaranteed to be undefined, it won't even enter this loop
+     */
+    for (var i = 0; i < routeController.routeTraversal.length; i++) {
+      app.routeTraversal.push(routeController.routeTraversal[i]);
+    }
+  }
+
+  // Finished this stack, prepare to backtrack
+  if (name) {
+    app.routeTraversal.push({
+      operation: POP,
+      name: name,
+      path: path
+    });
+  }
+}
+
+/**
+ * Generate the route names
+ * After all routing hierarchies are known, call this to build the route names
+ *
+ * Generated route table maps a route name to 2 fields:
+ * 1. pattern: the raw pattern as string (eg: /artikel/kategori/:category)
+ * 2. tokens: tokenized pattern, used to optimize urlFor
+ *
+ * Example for the generated routeTable:
+ *   routeTable['article.list'].pattern = '/artikel'
+ *   routeTable['article.list'].tokens = [
+ *   {text: ''},
+ *   {text: 'artikel'}
+ *   ]
+ *
+ *   routeTable['article.category'].pattern = '/artikel/kategori/:category'
+ *   routeTable['article.category'].tokens = [
+ *   {text: ''}
+ *   {text: 'artikel'},
+ *   {text: 'kategori'},
+ *   {text: 'category', input: true}
+ *   ]
+ * @author William Gozali <will.gozali@cermati.com>
+ * @param app - The express app
+ */
+function buildRouteNames(app) {
+  if (!_.isUndefined(routeTable)) {
+    throw new Error('Route table has been built before!');
+  }
+
+  var stack = [];
+  routeTable = {};
+
+  if (!app.routeTraversal) {
+    return;
+  }
+
+  // Simulate the routing traversal while generating route names
+  var previousEvent;
+  for (var i = 0; i < app.routeTraversal.length; i++) {
+    var event = app.routeTraversal[i];
+    if (event.operation === PUSH) {
+      stack.push({
+        name: event.name,
+        path: event.path
+      });
+    } else {
+      if (helper.isTerminalRoute(previousEvent, event)) {
+        var nameHierarchy = _.map(stack, 'name');
+        var patternHierarchy = _.map(stack, 'path');
+        helper.register(routeTable, nameHierarchy, patternHierarchy);
+      }
+
+      if (stack.length === 0) {
+        throw new Error('Stack in generating route names is not balanced');
+      }
+
+      stack.pop();
+    }
+
+    previousEvent = event;
+  }
+
+  if (stack.length !== 0) {
+    throw new Error('Leftover element exists in the stack while generating route names');
+  }
+}
+
+/**
+ * Given a route name and its params, return the final URL
+ * This function works only after buildRouteNames is executed
+ * Throws error when the params is not sufficient to build URL
+ *
+ * Optimized using routeTable[NAME].tokens:
+ * 1. Avoid matching using regex, and do replace in place (directly in the string)
+ * 2. Avoid removing ':' at the front of input token, it was done when generating route table
+ *
+ * @author William Gozali <will.gozali@cermati.com>
+ * @param {string} routeName - Name of the route
+ * @param {Object} [params] - Params to be fed to url pattern
+ * @param {Object} [queries] - Queries to be appended in the end of url
+ * @returns {string}
+ *
+ * @example
+ * Let's say after routing is done, we have:
+ *   routeTable['creditCard.list'].pattern = '/kartu-kredit'
+ *   routeTable['creditCard.detail'].pattern = '/kartu-kredit/:slug'
+ *   routeTable['creditCard.apply'].pattern = '/kartu-kredit/:slug/ajukan'
+ *
+ * In controller:
+ *   var router = require('../router'); // No need to pass app
+ *   router.urlFor('creditCard.list') => '/kartu-kredit'
+ *   router.urlFor('creditCard.list', {}, {issuer: 'abc'}) => '/kartu-kredit?issuer=abc'
+ *   router.urlFor('creditCard.list', {}, {issuer: 'abc', bonus: 'dog'}) => '/kartu-kredit?issuer=abc&bonus=dog'
+ *   router.urlFor('creditCard.detail', {slug: 'myCard'}) => '/kartu-kredit/myCard'
+ *   router.urlFor('creditCard.detail', {slug: 'myCard'}, {'no-layout': true}) => '/kartu-kredit/myCard?no-layout=true'
+ *   router.urlFor('creditCard.apply', {slug: 'myCard'}) => '/kartu-kredit/myCard/ajukan'
+ *   router.urlFor('creditCard.apply', {title: 'myCard'}) throws error because :slug is not filled
+ */
+function urlFor(routeName, params, queries) {
+  if (_.isUndefined(routeTable[routeName])) {
+    throw new Error('Attempted to use undefined routeName: ' + routeName);
+  }
+
+  var url = routeTable[routeName].tokens.map(function (token) {
+    var filledToken;
+
+    if (!token.input) {
+      filledToken = token.text;
+    } else {
+      if (_.isUndefined(params[token.text])) {
+        var message = util.format('Incomplete parameter for pattern: %s = %s', routeTable[routeName].pattern, token.text);
+        throw new Error(message);
+      }
+      filledToken = params[token.text];
+    }
+
+    return filledToken;
+  }).join('/');
+
+  if (queries) {
+    url = util.format('%s?%s', url, querystring.stringify(queries));
+  }
+
+  return url;
+}
+
+/**
+ * Create a router object, provided the express app
+ * It wraps `add` function defined above, so it can be easier to use
+ *
+ * It adapts express routing structure, can be called with this pattern:
+ * router.METHOD([name], path, [callback...], callback)
+ *
+ * @author William Gozali <will.gozali@cermati.com>
+ * Later, we can:
+ *   In routes/index:
+ *   var router = require('../router')(app);
+ *   var article = require('../modules/article');
+ *   router.all('/articles*', middleware.requireLogin); // Just middleware, no name necessary
+ *   router.use('articles', '/articles', article.routes);
+ *
+ *   In article/index module:
+ *   var express = keystone.express;
+ *   var app = express();
+ *   var router = require('../../router')(app);
+ *   router.get('list', '/', require('./views/list'));
+ *   router.get('detail', '/:title', require('./views/detail'));
+ *   router.post('save', '/:title', middleware.requireAdmin, require('./views/save')); // Can add middleware
+ */
+var route = function createRouter(app) {
+  return {
+    buildRouteNames: buildRouteNames.bind(null, app),
+    urlFor: urlFor,
+    get: add.bind(null, 'get', app),
+    post: add.bind(null, 'post', app),
+    put: add.bind(null, 'put', app),
+    head: add.bind(null, 'head', app),
+    all: add.bind(null, 'all', app),
+    delete: add.bind(null, 'delete', app),
+    use: add.bind(null, 'use', app)
+  };
+};
+
+// Attach additional fields which can be used without passing `app`
+route.urlFor = urlFor;
+
+/**
+ * Creates an absolute url for the given routeName, params, and queries.
+ *
+ * @example
+ *   process.env.BASE_URL = 'https://cermati.com';
+ *   route.absoluteUrlFor('me.applications') === `https://cermati.com/me/applications`;
+ *
+ * @author Sendy Halim <sendy@cermati.com>
+ * @param {string} routeName - Name of the route.
+ * @param {Object} [params] - Params to be fed to url pattern.
+ * @param {Object} [queries] - Queries to be appended in the end of url.
+ * @returns {string}
+ */
+route.absoluteUrlFor = function (routeName, params, queries) {
+  return process.env.BASE_URL.concat(urlFor(routeName, params, queries));
+};
+
+/**
+ * TODO: DOC
+ * @returns {{}}
+ */
+route.getRouteTable = function () {
+  var table = {};
+  _.keys(routeTable).forEach(function (key) {
+    table[key] = routeTable[key].pattern;
+  });
+
+  return table;
+};
+
+module.exports = route;

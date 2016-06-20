@@ -1,0 +1,31 @@
+{
+  "name": "mountable-named-router",
+  "version": "0.0.0",
+  "description": "named router",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "mocha --timeout 10000 $(find tests -name *.spec.js)"
+  },
+  "keywords": [
+    "named",
+    "router",
+    "express4",
+    "express",
+    "module"
+  ],
+  "author": "William Gozali",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "~4.13.1"
+  },
+  "devDependencies": {
+    "chai": "~3.5.0",
+    "mocha": "~2.5.3",
+    "rewire": "^2.5.1",
+    "sinon": "^1.17.4",
+    "sinon-chai": "^2.8.0"
+  }
+}
