@@ -53,7 +53,7 @@ var routerBase = {
  *   router.all('/articles*', middleware.requireLogin); // Just middleware, no name necessary
  *   router.use('articles', '/articles', article.routes);
  *
- *   In article/index module:
+ *   In module/article/index module:
  *   var express = keystone.express;
  *   var app = express();
  *   var router = require('../../router')(app);
@@ -64,14 +64,12 @@ var routerBase = {
 var router = function (app) {
   var router = routerBase;
 
-  _.each(routerBase, function (value, key) {
-    router[key] = value;
-  });
-
+  // Extend with HTTP methods
   constants.METHODS.forEach(function (method) {
     router[method] = add.bind(null, method, app);
   });
 
+  // Extend with additional functions
   router.use = add.bind(null, 'use', app);
   router.all = add.bind(null, 'all', app);
   router.buildRouteNames = buildRouteNames.bind(null, app);
