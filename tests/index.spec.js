@@ -94,7 +94,7 @@ describe('router/index.js', function () {
     });
   });
 
-  describe('.buildRouteNames()', function () {
+  describe('.buildRouteTable()', function () {
     var PUSH;
     var POP;
 
@@ -128,7 +128,7 @@ describe('router/index.js', function () {
           {operation: POP, name: 'baz', path: '/baz/:input'}
         ];
 
-        router.buildRouteNames();
+        router.buildRouteTable();
         routeTable = wiredRoute.__get__('routeTable');
       });
       it('should build the route table successfully', function () {
@@ -164,7 +164,7 @@ describe('router/index.js', function () {
           {operation: POP, name: 'bar', path: '/bar'}
         ];
 
-        router.buildRouteNames();
+        router.buildRouteTable();
         routeTable = wiredRoute.__get__('routeTable');
       });
       it('Non terminal route should be undefined', function () {
@@ -214,7 +214,7 @@ describe('router/index.js', function () {
           {operation: POP, name: '1', path: '/1'}
         ];
 
-        router.buildRouteNames();
+        router.buildRouteTable();
         routeTable = wiredRoute.__get__('routeTable');
       });
 

@@ -11,7 +11,7 @@
  * 1. var router = require('/path/to/this/router')(app);
  * 2. var router = require('/path/to/this/router');
  *
- * When mode 1 is used, router can register route (.get, .post, ...), buildRouteNames, and urlFor
+ * When mode 1 is used, router can register route (.get, .post, ...), buildRouteTable, and urlFor
  * When mode 2 is used, router can only do urlFor(...)
  * @author William Gozali <will.gozali@cermati.com>
  */
@@ -72,7 +72,7 @@ var router = function (app) {
   // Extend with additional functions
   router.use = add.bind(null, 'use', app);
   router.all = add.bind(null, 'all', app);
-  router.buildRouteNames = buildRouteNames.bind(null, app);
+  router.buildRouteTable = buildRouteTable.bind(null, app);
 
   return router;
 };
@@ -196,7 +196,7 @@ function add() {
  * @author William Gozali <will.gozali@cermati.com>
  * @param app - The express app
  */
-function buildRouteNames(app) {
+function buildRouteTable(app) {
   if (!_.isUndefined(routeTable)) {
     throw new Error('Route table has been built before!');
   }
@@ -241,7 +241,7 @@ function buildRouteNames(app) {
 
 /**
  * Given a route name and its params, return the final URL
- * This function works only after buildRouteNames is executed
+ * This function works only after buildRouteTable is executed
  * Throws error when the params is not sufficient to build URL
  *
  * Optimized using routeTable[NAME].tokens:
