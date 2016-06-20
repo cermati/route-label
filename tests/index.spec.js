@@ -1,10 +1,6 @@
 'use strict';
 
-/**
- * Test for our homemade named router
- * @author William Gozali <will.gozali@cermati.com>
- */
-
+var _ = require('lodash');
 var chai = require('chai');
 var rewire = require('rewire');
 var sinon = require('sinon');
@@ -455,6 +451,57 @@ describe('router/index.js', function () {
           expect(absoluteUrlFor('foo.list-category', {category: 0})).to.equal(baseUrl + '/foo/category/0');
         });
       });
+    });
+  });
+
+  describe('.getRouteTable()', function () {
+    var routeTable;
+    var router;
+    var revert;
+
+    before('initialize table and inject it to router', function () {
+      router = rewire('../index');
+
+      routeTable = {};
+      routeTable['foo'] = {
+        pattern: '/foo',
+        tokens: [{text: ''}, {text: 'foo'}]
+      };
+      routeTable['foo.list'] = {
+        pattern: '/foo',
+        tokens: [{text: ''}, {text: 'foo'}]
+      };
+      routeTable['foo.detail'] = {
+        pattern: '/foo/:input',
+        tokens: [{text: ''}, {text: 'foo'}, {text: 'input', input: true}]
+      };
+      routeTable['foo.list-category'] = {
+        pattern: '/foo/category/:category',
+        tokens: [{text: ''}, {text: 'foo'}, {text: 'category'}, {text: 'category', input: true}]
+      };
+      routeTable['foo.list-category.detail'] = {
+        pattern: '/foo/category/:category/:slug',
+        tokens: [{text: ''}, {text: 'foo'}, {text: 'category'}, {text: 'category', input: true}, {text: 'slug', input: true}]
+      };
+      routeTable['weird.doubled.input'] = {
+        pattern: '/foo/:input/bun/:input',
+        tokens: [{text: ''}, {text: 'foo'}, {text: 'input', input: true}, {text: 'bun'}, {text: 'input', input: true}]
+      };
+
+      revert = router.__set__('routeTable', routeTable);
+    });
+
+    after('clean up rewire', function () {
+      revert();
+    });
+
+    it('should return correct table', function () {
+      var expectedRouteTable = {};
+      _.each(routeTable, function (value, key) {
+        expectedRouteTable[key] = value.pattern;
+      });
+
+      expect(router.getRouteTable()).to.deep.equal(expectedRouteTable);
     });
   });
 });
