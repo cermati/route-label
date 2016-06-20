@@ -11,10 +11,10 @@ var self = exports;
  * @param name
  */
 exports.isValidName = function (name) {
-    if (!_.isString(name)) {
-        return false;
-    }
-    return name.match(/^[-_.a-zA-Z0-9]+$/) !== null;
+  if (!_.isString(name)) {
+    return false;
+  }
+  return name.match(/^[-_.a-zA-Z0-9]+$/) !== null;
 };
 
 /**
@@ -26,13 +26,13 @@ exports.isValidName = function (name) {
  * @param path
  */
 exports.isValidPathForNamedRoute = function (path) {
-    if (!_.isString(path)) {
-        return false;
-    }
-    if (path === '/') {
-        return true;
-    }
-    return path.match(/^(\/:?[-_.a-zA-Z0-9]+)+$/) !== null;
+  if (!_.isString(path)) {
+    return false;
+  }
+  if (path === '/') {
+    return true;
+  }
+  return path.match(/^(\/:?[-_.a-zA-Z0-9]+)+$/) !== null;
 };
 
 /**
@@ -45,14 +45,14 @@ exports.isValidPathForNamedRoute = function (path) {
  * toToken(':slug-id') => {text: 'slug-id', input: true}
  */
 exports.toToken = function (item) {
-    var token = {};
-    if ((item.length > 0) && (item.charAt(0) === ':')) {
-        token.text = item.substring(1);
-        token.input = true;
-    } else {
-        token.text = item;
-    }
-    return token;
+  var token = {};
+  if ((item.length > 0) && (item.charAt(0) === ':')) {
+    token.text = item.substring(1);
+    token.input = true;
+  } else {
+    token.text = item;
+  }
+  return token;
 };
 
 /**
@@ -65,11 +65,11 @@ exports.toToken = function (item) {
  * buildPath(['/foo', '/', '/deep-foo']) => '/foo/deep-foo'
  */
 exports.buildPath = function (pathHierarchy) {
-    var cleanPathHierarchy = _.without(pathHierarchy, '/');
-    if (cleanPathHierarchy.length === 0) {
-        cleanPathHierarchy = ['/'];
-    }
-    return cleanPathHierarchy.join('');
+  var cleanPathHierarchy = _.without(pathHierarchy, '/');
+  if (cleanPathHierarchy.length === 0) {
+    cleanPathHierarchy = ['/'];
+  }
+  return cleanPathHierarchy.join('');
 };
 
 /**
@@ -79,13 +79,13 @@ exports.buildPath = function (pathHierarchy) {
  * tokensToString(routeTable['article.category'].tokens) => /article/categories/:category
  */
 exports.tokensToString = function (tokens) {
-    return _.map(tokens, function (token) {
-        var str = token.text;
-        if (token.input) {
-            str = ':' + str;
-        }
-        return str;
-    }).join('/');
+  return _.map(tokens, function (token) {
+    var str = token.text;
+    if (token.input) {
+      str = ':' + str;
+    }
+    return str;
+  }).join('/');
 };
 
 /**
@@ -93,20 +93,20 @@ exports.tokensToString = function (tokens) {
  * @author William Gozali <will.gozali@cermati.com>
  */
 exports.register = function (routeTable, nameHierarchy, pathHierarchy) {
-    var name = nameHierarchy.join('.');
-    var pattern = self.buildPath(pathHierarchy);
+  var name = nameHierarchy.join('.');
+  var pattern = self.buildPath(pathHierarchy);
 
-    if (routeTable[name] && (pattern !== routeTable[name].pattern)) {
-        throw new Error('There are duplicates in route name: ' + name);
-    }
-    if (!self.isValidPathForNamedRoute(pattern)) {
-        throw new Error('Generated pattern is malformed, check the routing implementation: ' + pattern);
-    }
+  if (routeTable[name] && (pattern !== routeTable[name].pattern)) {
+    throw new Error('There are duplicates in route name: ' + name);
+  }
+  if (!self.isValidPathForNamedRoute(pattern)) {
+    throw new Error('Generated pattern is malformed, check the routing implementation: ' + pattern);
+  }
 
-    routeTable[name] = {
-        pattern: pattern,
-        tokens: pattern.split('/').map(self.toToken)
-    };
+  routeTable[name] = {
+    pattern: pattern,
+    tokens: pattern.split('/').map(self.toToken)
+  };
 };
 
 /**
@@ -114,12 +114,12 @@ exports.register = function (routeTable, nameHierarchy, pathHierarchy) {
  * @author William Gozali <will.gozali@cermati.com>
  */
 exports.isTerminalRoute = function (previousEvent, event) {
-    if (_.isUndefined(previousEvent)) {
-        return false;
-    }
-
-    if ((previousEvent.operation === constants.PUSH) && (event.operation === constants.POP)) {
-        return (previousEvent.name === event.name);
-    }
+  if (_.isUndefined(previousEvent)) {
     return false;
+  }
+
+  if ((previousEvent.operation === constants.PUSH) && (event.operation === constants.POP)) {
+    return (previousEvent.name === event.name);
+  }
+  return false;
 };
