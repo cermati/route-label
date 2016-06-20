@@ -1,22 +1,21 @@
 {
   "name": "mountable-named-router",
   "version": "0.0.0",
-  "description": "named router",
+  "description": "named router compatible with express 4 routing",
   "main": "index.js",
-  "directories": {
-    "test": "tests"
-  },
   "scripts": {
     "test": "mocha --timeout 10000 $(find tests -name *.spec.js)"
   },
   "keywords": [
     "named",
     "router",
-    "express4",
-    "express",
-    "module"
+    "named router",
+    "url generator",
+    "express 4 router",
+    "express router",
+    "router module"
   ],
-  "author": "William Gozali",
+  "author": "William Gozali <will.gozali@cermati.com>",
   "license": "MIT",
   "dependencies": {
     "lodash": "~4.13.1"
