@@ -1,6 +1,6 @@
 {
   "name": "route-label",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "named router compatible with express 4 routing",
   "main": "index.js",
   "scripts": {
