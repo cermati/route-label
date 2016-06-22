@@ -1,6 +1,5 @@
 'use strict';
 
-var _ = require('lodash');
 var chai = require('chai');
 var rewire = require('rewire');
 var sinon = require('sinon');

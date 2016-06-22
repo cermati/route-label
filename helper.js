@@ -1,6 +1,5 @@
 'use strict';
 
-var _ = require('lodash');
 var constants = require('./constants');
 var self = exports;
 
