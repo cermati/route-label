@@ -62,7 +62,13 @@ var routerBase = {
  *   router.post('save', '/:title', middleware.requireAdmin, require('./views/save')); // Can add middleware
  */
 var router = function (app) {
-  var router = routerBase;
+  // Inherit other method from app
+  var router = Object.create(app);
+
+  // Attach basic functionality
+  _.each(routerBase, function (value, key) {
+    router[key] = value;
+  });
 
   // Extend with HTTP methods
   constants.METHODS.forEach(function (method) {
@@ -77,7 +83,7 @@ var router = function (app) {
   return router;
 };
 
-// If "required" without invoking `(app)`, simply attach basic functionalities to returned constructor
+// If "required" without invoking `(app)`, simply attach basic functionality to returned constructor
 _.each(routerBase, function (value, key) {
   router[key] = value;
 });

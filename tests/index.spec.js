@@ -504,4 +504,21 @@ describe('router/index.js', function () {
       expect(router.getRouteTable()).to.deep.equal(expectedRouteTable);
     });
   });
+
+  context('Other method', function () {
+    var app = {
+      get: function () {},
+      post: function () {},
+      all: function () {},
+      use: function () {},
+      nativeMethod: function () {
+        return 'exist!';
+      }
+    };
+
+    it('should inherit app\'s method', function () {
+      var router = require('../index')(app);
+      expect(router.nativeMethod()).to.equal('exist!');
+    });
+  });
 });
