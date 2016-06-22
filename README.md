@@ -46,7 +46,7 @@ router.urlFor('article.detail', {title: 'love-craft'}) -> /articles/love-craft
 
 For every route definition file, wrap the app instance with this library:
 ```
-var router = require('routeable')(app);
+var router = require('route-label')(app);
 ```
 
 Then you can define any routing with this signature:
@@ -67,7 +67,7 @@ This will process all registered route above and store it for future URL generat
 
 Example:
 ```
-var router = require('routeable')(app);
+var router = require('route-label')(app);
 
 router.all('/*', require('/path/to/middleware/...'));
 router.get('user.detail', '/users/:id', require('/path/to/controller/...'));
@@ -104,9 +104,9 @@ It is not clear what `urlFor('sample')` should return.
 ## Generate URL
 
 ### urlFor
-To generate URL, it is **not necessary** for routeable to wrap app instance.
+To generate URL, it is **not necessary** for route-label to wrap app instance.
 ```
-var router = require('routeable'); // No need to wrap `app` here
+var router = require('route-label'); // No need to wrap `app` here
 ```
 
 You can then call `urlFor` with this signature:
@@ -160,7 +160,7 @@ router.urlFor('article.detail', {title: 'cool-guy'});
 
 ### getRouteTable
 
-After `buildRouteTable`, you can call this anywhere using routeable (with or without wrapping app).
+After `buildRouteTable`, you can call this anywhere using route-label (with or without wrapping app).
 ```
 /*
 Consider this route definitions:
@@ -180,7 +180,7 @@ Will return:
 
 # Installation
 ```
-npm install routeable
+npm install route-label
 ```
 
 # FAQ

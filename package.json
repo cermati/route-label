@@ -1,5 +1,5 @@
 {
-  "name": "routeable",
+  "name": "route-label",
   "version": "0.0.0",
   "description": "named router compatible with express 4 routing",
   "main": "index.js",
