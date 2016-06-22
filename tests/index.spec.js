@@ -525,9 +525,11 @@ describe('router/index.js', function () {
 
     it('should return correct table', function () {
       var expectedRouteTable = {};
-      _.each(routeTable, function (value, key) {
-        expectedRouteTable[key] = value.pattern;
-      });
+      for (var k in routeTable){
+        if (routeTable.hasOwnProperty(k)) {
+          expectedRouteTable[k] = routeTable[k].pattern;
+        }
+      }
 
       expect(router.getRouteTable()).to.deep.equal(expectedRouteTable);
     });

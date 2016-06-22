@@ -11,7 +11,7 @@ var self = exports;
  * @param name
  */
 exports.isValidName = function (name) {
-  if (!_.isString(name)) {
+  if (typeof name !== 'string') {
     return false;
   }
   return name.match(/^[-_.a-zA-Z0-9]+$/) !== null;
@@ -26,7 +26,7 @@ exports.isValidName = function (name) {
  * @param path
  */
 exports.isValidPathForNamedRoute = function (path) {
-  if (!_.isString(path)) {
+  if (typeof path != 'string') {
     return false;
   }
   if (path === '/') {
@@ -65,7 +65,14 @@ exports.toToken = function (item) {
  * buildPath(['/foo', '/', '/deep-foo']) => '/foo/deep-foo'
  */
 exports.buildPath = function (pathHierarchy) {
-  var cleanPathHierarchy = _.without(pathHierarchy, '/');
+  var slashIgnored = [];
+  pathHierarchy.forEach(function (path) {
+    if (path !== '/') {
+      slashIgnored.push(path);
+    }
+  });
+
+  var cleanPathHierarchy = slashIgnored;
   if (cleanPathHierarchy.length === 0) {
     cleanPathHierarchy = ['/'];
   }
@@ -79,7 +86,7 @@ exports.buildPath = function (pathHierarchy) {
  * tokensToString(routeTable['article.category'].tokens) => /article/categories/:category
  */
 exports.tokensToString = function (tokens) {
-  return _.map(tokens, function (token) {
+  return tokens.map(function (token) {
     var str = token.text;
     if (token.input) {
       str = ':' + str;
@@ -114,7 +121,7 @@ exports.register = function (routeTable, nameHierarchy, pathHierarchy) {
  * @author William Gozali <will.gozali@cermati.com>
  */
 exports.isTerminalRoute = function (previousEvent, event) {
-  if (_.isUndefined(previousEvent)) {
+  if (previousEvent === undefined) {
     return false;
   }
 

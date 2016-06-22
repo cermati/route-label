@@ -66,9 +66,11 @@ var router = function (app) {
   var router = Object.create(app);
 
   // Attach basic functionality
-  _.each(routerBase, function (value, key) {
-    router[key] = value;
-  });
+  for (var k in routerBase){
+    if (routerBase.hasOwnProperty(k)) {
+      router[k] = routerBase[k];
+    }
+  }
 
   // Extend with HTTP methods
   constants.METHODS.forEach(function (method) {
@@ -84,9 +86,11 @@ var router = function (app) {
 };
 
 // If "required" without invoking `(app)`, simply attach basic functionality to returned constructor
-_.each(routerBase, function (value, key) {
-  router[key] = value;
-});
+for (var k in routerBase){
+  if (routerBase.hasOwnProperty(k)) {
+    router[k] = routerBase[k];
+  }
+}
 
 module.exports = router;
 
@@ -118,7 +122,7 @@ function add() {
   var offset;
   var middlewares;
 
-  if (_.isString(args[3])) {
+  if (typeof args[3] === 'string') {
     // Name is provided
     name = args[2];
     path = args[3];
