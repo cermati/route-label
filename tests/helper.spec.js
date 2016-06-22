@@ -157,4 +157,28 @@ describe('router/helper.js', function () {
       });
     });
   });
+
+  describe('.flattenDeep()', function () {
+    context('when given empty array', function () {
+      it('should return empty array', function () {
+        expect(routeHelper.flattenDeep([])).to.deep.equal([]);
+      });
+    });
+
+    context('when given array with no nested elements', function () {
+      it('should return empty array', function () {
+        expect(routeHelper.flattenDeep([1])).to.deep.equal([1]);
+        expect(routeHelper.flattenDeep(['a'])).to.deep.equal(['a']);
+        expect(routeHelper.flattenDeep([{a: 1, b: 2}])).to.deep.equal([{a: 1, b: 2}]);
+      });
+    });
+
+    context('when given array with deep nested elements', function () {
+      it('should return empty array', function () {
+        expect(routeHelper.flattenDeep([[1]])).to.deep.equal([1]);
+        expect(routeHelper.flattenDeep([[[[1]]]])).to.deep.equal([1]);
+        expect(routeHelper.flattenDeep(['a', [1, 2, 'b'], 1, [[1, []]]])).to.deep.equal(['a', 1, 2, 'b', 1, 1]);
+      });
+    });
+  });
 });

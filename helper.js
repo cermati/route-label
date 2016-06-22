@@ -130,3 +130,23 @@ exports.isTerminalRoute = function (previousEvent, event) {
   }
   return false;
 };
+
+/**
+ * Flatten deep an array
+ * @author William Gozali <will.gozali@cermati.com>
+ */
+exports.flattenDeep = function (nestedArrays) {
+  var ret = [];
+  nestedArrays.forEach(function (item) {
+    if (!Array.isArray(item)) {
+      ret.push(item);
+    } else {
+      var temp = self.flattenDeep(item);
+      temp.forEach(function (x) {
+        ret.push(x);
+      });
+    }
+  });
+
+  return ret;
+};

@@ -18,9 +18,7 @@
   ],
   "author": "William Gozali <will.gozali@cermati.com>",
   "license": "MIT",
-  "dependencies": {
-    "lodash": "~4.13.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "chai": "~3.5.0",
     "mocha": "~2.5.3",

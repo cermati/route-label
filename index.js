@@ -18,7 +18,6 @@
 
 'use strict';
 
-var _ = require('lodash');
 var querystring = require('querystring');
 var util = require('util');
 
@@ -113,7 +112,12 @@ module.exports = router;
  * @author William Gozali <will.gozali@cermati.com>
  */
 function add() {
-  var args = _.values(arguments);
+  var args = [];
+  for (var k in arguments){
+    if (arguments.hasOwnProperty(k)) {
+      args.push(arguments[k]);
+    }
+  }
 
   var method = args[0];
   var app = args[1];
@@ -139,7 +143,7 @@ function add() {
     path = args[2];
     offset = 3;
   }
-  middlewares = _.flattenDeep(args.slice(offset));
+  middlewares = helper.flattenDeep(args.slice(offset));
 
   if (!app.routeTraversal) {
     // Singleton for each app
@@ -158,8 +162,8 @@ function add() {
   // Register this for express to do its stuff
   app[method](path, middlewares);
 
-  var routeController = _.last(middlewares);
-  if (_.isArray(routeController.routeTraversal)) {
+  var routeController = middlewares[middlewares.length - 1];
+  if (Array.isArray(routeController.routeTraversal)) {
     /*
      As with our function signature, the last element of the middlewares is assumed to be
      the "handler" for the controller logic.
@@ -207,7 +211,7 @@ function add() {
  * @param app - The express app
  */
 function buildRouteTable(app) {
-  if (!_.isUndefined(routeTable)) {
+  if (routeTable !== undefined) {
     throw new Error('Route table has been built before!');
   }
 
@@ -229,8 +233,12 @@ function buildRouteTable(app) {
       });
     } else {
       if (helper.isTerminalRoute(previousEvent, event)) {
-        var nameHierarchy = _.map(stack, 'name');
-        var patternHierarchy = _.map(stack, 'path');
+        var nameHierarchy = stack.map(function (item) {
+          return item.name;
+        });
+        var patternHierarchy = stack.map(function (item) {
+          return item.path;
+        });
         helper.register(routeTable, nameHierarchy, patternHierarchy);
       }
 
@@ -281,7 +289,7 @@ function buildRouteTable(app) {
  *   router.urlFor('creditCard.apply', {title: 'myCard'}) throws error because :slug is not filled
  */
 function urlFor(routeName, params, queries) {
-  if (_.isUndefined(routeTable[routeName])) {
+  if (routeTable[routeName] === undefined) {
     throw new Error('Attempted to use undefined routeName: ' + routeName);
   }
 
@@ -292,7 +300,7 @@ function urlFor(routeName, params, queries) {
       filledToken = token.text;
     } else {
       var param = params[token.text];
-      if (_.isUndefined(param) || _.isNull(param) || (param === '')) {
+      if ((param === undefined) || (param === null) || (param === '')) {
         var message = util.format('Incomplete parameter for pattern: %s = %s', routeTable[routeName].pattern, token.text);
         throw new Error(message);
       }
@@ -346,9 +354,12 @@ function setBaseUrl(_baseUrl) {
  */
 function getRouteTable() {
   var table = {};
-  _.keys(routeTable).forEach(function (key) {
-    table[key] = routeTable[key].pattern;
-  });
+
+  for (var k in routeTable){
+    if (routeTable.hasOwnProperty(k)) {
+      table[k] = routeTable[k].pattern;
+    }
+  }
 
   return table;
 }
