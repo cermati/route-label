@@ -329,8 +329,22 @@ describe('router/index.js', function () {
     });
 
     context('when given falsy parameter', function () {
-      it('should return the url with falsy parameter', function () {
+      it('should return the url with 0', function () {
         expect(urlFor('foo.list-category', {category: 0})).to.equal('/foo/category/0');
+      });
+
+      it('should throw error for empty string, undefined, and null', function () {
+        expect(function () {
+          urlFor('foo.list-category', {category: ''});
+        }).to.throw(Error);
+
+        expect(function () {
+          urlFor('foo.list-category', {category: null});
+        }).to.throw(Error);
+
+        expect(function () {
+          urlFor('foo.list-category', {category: undefined});
+        }).to.throw(Error);
       });
     });
   });
@@ -447,8 +461,22 @@ describe('router/index.js', function () {
       });
 
       context('when given falsy parameter', function () {
-        it('should return the url with falsy parameter', function () {
+        it('should return the url with 0', function () {
           expect(absoluteUrlFor('foo.list-category', {category: 0})).to.equal(baseUrl + '/foo/category/0');
+        });
+
+        it('should throw error for empty string, undefined, and null', function () {
+          expect(function () {
+            absoluteUrlFor('foo.list-category', {category: ''});
+          }).to.throw(Error);
+
+          expect(function () {
+            absoluteUrlFor('foo.list-category', {category: null});
+          }).to.throw(Error);
+
+          expect(function () {
+            absoluteUrlFor('foo.list-category', {category: undefined});
+          }).to.throw(Error);
         });
       });
     });

@@ -287,7 +287,8 @@ function urlFor(routeName, params, queries) {
     if (!token.input) {
       filledToken = token.text;
     } else {
-      if (_.isUndefined(params[token.text])) {
+      var param = params[token.text];
+      if (_.isUndefined(param) || _.isNull(param) || (param === '')) {
         var message = util.format('Incomplete parameter for pattern: %s = %s', routeTable[routeName].pattern, token.text);
         throw new Error(message);
       }
