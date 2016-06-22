@@ -46,7 +46,7 @@ router.urlFor('article.detail', {title: 'love-craft'}) -> /articles/love-craft
 
 For every route definition file, wrap the app instance with this library:
 ```
-var router = require('TODO')(app);
+var router = require('routeable')(app);
 ```
 
 Then you can define any routing with this signature:
@@ -67,7 +67,7 @@ This will process all registered route above and store it for future URL generat
 
 Example:
 ```
-var router = require('TODO')(app);
+var router = require('routeable')(app);
 
 router.all('/*', require('/path/to/middleware/...'));
 router.get('user.detail', '/users/:id', require('/path/to/controller/...'));
@@ -78,7 +78,9 @@ router.buildRouteTable();
 
 ### Mounting Submodule
 
-If you mount another "submodule" with `use` keyword, the given name will be prefix for all routes inside that submodule.
+If you mount another "submodule" with `use` keyword, the given name will become prefix for all routes inside that submodule.
+Prefixes will be concatenated with dot ('.') character. It is also possible to have subsubmodule and subsubsubmodule.
+
 Example, in your `/routes/index.js`:
 ```
 router.use('article', '/articles', require('/path/to/module/article');
@@ -102,9 +104,9 @@ It is not clear what `urlFor('sample')` should return.
 ## Generate URL
 
 ### urlFor
-To generate URL, it is **not necessary** for TODO to wrap app instance.
+To generate URL, it is **not necessary** for routeable to wrap app instance.
 ```
-var router = require('TODO'); // No need to wrap `app` here
+var router = require('routeable'); // No need to wrap `app` here
 ```
 
 You can then call `urlFor` with this signature:
@@ -158,7 +160,7 @@ router.urlFor('article.detail', {title: 'cool-guy'});
 
 ### getRouteTable
 
-After `buildRouteTable`, you can call this anywhere using TODO (with or without wrapping app).
+After `buildRouteTable`, you can call this anywhere using routeable (with or without wrapping app).
 ```
 /*
 Consider this route definitions:
@@ -178,7 +180,7 @@ Will return:
 
 # Installation
 ```
-npm install TODO
+npm install routeable
 ```
 
 # FAQ
@@ -188,6 +190,9 @@ Is it optimized?
 
 How does it works internally?
 > It wraps Express' routing, attaching name in the routes. When .buildRouteTable is called, the attached names are traversed in pre-order fashion. The result is stored in table. 
+
+Can it be used as template helper?
+> Yes. For example in Handlebars.js, you can define custom helper which calls `urlFor`.
 
 # License
 MIT
