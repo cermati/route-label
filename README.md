@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/cermati/route-label.svg)](https://travis-ci.org/cermati/route-label)
 [![npm version](https://badge.fury.io/js/route-label.svg)](https://badge.fury.io/js/route-label)
 
 # What
