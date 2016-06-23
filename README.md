@@ -80,6 +80,8 @@ router.METHOD([name,] path, [middleware ...,] lastMiddleware);
 
 `name` may contain alphanumeric, dot, dashes, and underscore.
 
+`METHOD` is the router's method, such as `get`, `post`, `put`, `all`, or `use`.
+
 At the end of your **outermost** route definitions, call:
 ```js
 router.buildRouteTable();
@@ -139,12 +141,12 @@ To generate URL, it is **not necessary** for route-label to wrap app instance.
 var router = require('route-label'); // No need to wrap `app` here
 ```
 
-You can then call `urlFor` with this signature:
+Then you can call `urlFor` with this signature:
 ```js
 urlFor(routeName, [paramObj], [queryObj])
 ```
 
-Where `paramObj` is object containing values to be plugged to the URL, and `queries` is object which will be serialized as query string.
+Where `paramObj` is object containing values to be plugged to the URL, and `queryObj` is object which will be serialized as query string.
 
 Example:
 ```js
