@@ -1,6 +1,6 @@
 # What
 
-Register your route as natural as express' way, PLUS adding name/label for it.
+Register your route as natural as express' way, PLUS adding name/label to it.
 ```js
 router.get(<name>, <pattern>, <middleware/controller>);
 router.put(<name>, <pattern>, <middleware/controller>);
@@ -121,7 +121,7 @@ It is not clear what `urlFor('sample')` should return.
 
 ## Generate URL
 
-### urlFor
+### .urlFor
 To generate URL, it is **not necessary** for route-label to wrap app instance.
 ```js
 var router = require('route-label'); // No need to wrap `app` here
@@ -159,7 +159,7 @@ router.urlFor('article.detail', {});
 router.urlFor('article.detail', {caption: 'cool-guy'});
 ```
 
-### absoluteUrlFor
+### .absoluteUrlFor
 To generate absolute URL, set the `baseUrl` with:
 ```js
 router.setBaseUrl(baseUrl);
@@ -176,7 +176,7 @@ router.setBaseUrl('https://www.cermati.com');
 router.urlFor('article.detail', {title: 'cool-guy'});
 ```
 
-### getRouteTable
+### .getRouteTable
 
 After `buildRouteTable`, you can call this anywhere using route-label (with or without wrapping app).
 ```js
@@ -194,11 +194,6 @@ Will return:
   'article.list': '/articles'
   'article.detail': '/articles/:title'
 }
-```
-
-# Installation
-```
-npm install route-label
 ```
 
 # FAQ
