@@ -3,7 +3,7 @@
 
 # What
 
-Register your route as natural as express' way, PLUS adding name/label to it.
+Register your route as natural as Express' way, PLUS adding name/label to it.
 ```js
 router.get(<name>, <pattern>, <middleware/controller>);
 router.put(<name>, <pattern>, <middleware/controller>);
@@ -216,11 +216,11 @@ Will return:
 Is it optimized?
 > Yes, we tried our best to optimize the route generation so it runs as fast as possible
 
-How does it works internally?
+How does it work internally?
 > It wraps Express' routing, attaching name in the routes. When .buildRouteTable is called, the attached names are traversed in pre-order fashion. The result is stored in table. 
 
 Can it be used as template helper?
-> Yes. For example in Handlebars.js, you can define custom helper which calls `urlFor`.
+> You can, if the template engine allow creation of custom helper. For example in Handlebars.js, you can define custom helper which calls `urlFor`.
 
 # License
 MIT
