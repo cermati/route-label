@@ -1,3 +1,5 @@
+[![npm version](https://badge.fury.io/js/route-label.svg)](https://badge.fury.io/js/route-label)
+
 # What
 
 Register your route as natural as express' way, PLUS adding name/label to it.
