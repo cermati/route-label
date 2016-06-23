@@ -62,6 +62,8 @@ router.urlFor('article.detail', {title: 'love-craft'}) -> /articles/love-craft
 
 ### Basic
 
+In this explanation, `app` refers to `express()` instance.
+
 For every route definition file, wrap the app instance with this library:
 ```js
 var router = require('route-label')(app);
@@ -76,12 +78,13 @@ router.METHOD([name,] path, [middleware ...,] lastMiddleware);
 
 `name` may contain alphanumeric, dot, dashes, and underscore.
 
-At the end of your outermost route definitions, call:
+At the end of your **outermost** route definitions, call:
 ```js
 router.buildRouteTable();
 ```
 
 This will process all registered route above and store it for future URL generation (`urlFor`).
+You only need to call it once.
 
 Example:
 ```js
@@ -115,9 +118,16 @@ router.post('detail', '/:title', require('/path/to/module/article/controller/...
 You can't use wildcard for named router, because generating its URL sounds weird.
 Consider:
 ```js
+// Can't!
 router.get('sample', '/sample/*/text', require('/path/to/controller/...'));
 ```
 It is not clear what `urlFor('sample')` should return. 
+
+As you probably need this pattern for middleware, simply skip the `name` parameter.
+```js
+// OK!
+router.get('/sample/*/text', require('/path/to/controller/...'));
+```
 
 ## Generate URL
 
@@ -173,7 +183,7 @@ Example:
 router.setBaseUrl('https://www.cermati.com');
 
 // Returns https://www.cermati.com/articles/cool-guy
-router.urlFor('article.detail', {title: 'cool-guy'});
+router.absoluteUrlFor('article.detail', {title: 'cool-guy'});
 ```
 
 ### .getRouteTable
