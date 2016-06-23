@@ -1,11 +1,16 @@
 {
   "name": "route-label",
   "version": "0.0.1",
-  "description": "named router compatible with express 4 routing",
+  "description": "Named router & URL generator, compatible with express 4 routing",
   "main": "index.js",
   "scripts": {
     "test": "mocha --timeout 10000 $(find tests -name *.spec.js)"
   },
+  "bugs": {
+    "url": "https://github.com/cermati/route-label"
+  },
+  "homepage": "https://github.com/cermati/route-label",
+  "repository": "cermati/route-label",
   "keywords": [
     "named",
     "router",

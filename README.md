@@ -1,7 +1,25 @@
-# Express.js Named Router + URL Generator
+# What
+
+Register your route as natural as express' way, PLUS adding name/label for it.
+```js
+router.get(<name>, <pattern>, <middleware/controller>);
+router.put(<name>, <pattern>, <middleware/controller>);
+router.post(<name>, <pattern>, <middleware/controller>);
+// Etc...
+
+// When using `use`, name will become prefix for routes inside the mounted module
+router.use(<name>, <pattern>, <module>);
+```
+
+Then generating your URL is as easy as calling `urlFor`:
+```js
+router.urlFor(<name>, <params>);
+```
+
+# Quick Example
 
 Either:
-```
+```js
 // In index.js
 router.get('user.detail', '/users/:id', require('/path/to/controller/...'));
 router.post('user.edit', '/users/:id/edit', require('/path/to/controller/...'));
@@ -11,7 +29,7 @@ router.get('article.detail', '/articles/:title', require('/path/to/controller/..
 ```
 
 or:
-```
+```js
 // In index.js
 router.use('user', '/users', require('/path/to/module/user');
 router.use('article', '/articles', require('/path/to/module/post');
@@ -26,7 +44,7 @@ router.post('detail', '/:title', require('/path/to/module/article/controller/...
 ```
 
 You can:
-```
+```js
 router.urlFor('user.detail', {id: 0})                  -> /users/0
 router.urlFor('user.edit', {id: 2})                    -> /users/2/edit
 router.urlFor('article.list')                          -> /articles
@@ -45,12 +63,12 @@ router.urlFor('article.detail', {title: 'love-craft'}) -> /articles/love-craft
 ### Basic
 
 For every route definition file, wrap the app instance with this library:
-```
+```js
 var router = require('route-label')(app);
 ```
 
 Then you can define any routing with this signature:
-```
+```js
 router.METHOD([name,] path, [middleware ...,] lastMiddleware);
 ```
 
@@ -59,14 +77,14 @@ router.METHOD([name,] path, [middleware ...,] lastMiddleware);
 `name` may contain alphanumeric, dot, dashes, and underscore.
 
 At the end of your outermost route definitions, call:
-```
+```js
 router.buildRouteTable();
 ```
 
 This will process all registered route above and store it for future URL generation (`urlFor`).
 
 Example:
-```
+```js
 var router = require('route-label')(app);
 
 router.all('/*', require('/path/to/middleware/...'));
@@ -82,12 +100,12 @@ If you mount another "submodule" with `use` keyword, the given name will become 
 Prefixes will be concatenated with dot ('.') character. It is also possible to have subsubmodule and subsubsubmodule.
 
 Example, in your `/routes/index.js`:
-```
+```js
 router.use('article', '/articles', require('/path/to/module/article');
 ```
 
 In `/path/to/module/article/index.js`:
-```
+```js
 router.get('list', '/', require('/path/to/module/article/controller/...'));
 router.post('detail', '/:title', require('/path/to/module/article/controller/...'));
 ```
@@ -96,7 +114,7 @@ router.post('detail', '/:title', require('/path/to/module/article/controller/...
 
 You can't use wildcard for named router, because generating its URL sounds weird.
 Consider:
-```
+```js
 router.get('sample', '/sample/*/text', require('/path/to/controller/...'));
 ```
 It is not clear what `urlFor('sample')` should return. 
@@ -105,19 +123,19 @@ It is not clear what `urlFor('sample')` should return.
 
 ### urlFor
 To generate URL, it is **not necessary** for route-label to wrap app instance.
-```
+```js
 var router = require('route-label'); // No need to wrap `app` here
 ```
 
 You can then call `urlFor` with this signature:
-```
+```js
 urlFor(routeName, [paramObj], [queryObj])
 ```
 
 Where `paramObj` is object containing values to be plugged to the URL, and `queries` is object which will be serialized as query string.
 
 Example:
-```
+```js
 /*
 Consider this route definitions:
   'article.list' => '/articles'
@@ -143,7 +161,7 @@ router.urlFor('article.detail', {caption: 'cool-guy'});
 
 ### absoluteUrlFor
 To generate absolute URL, set the `baseUrl` with:
-```
+```js
 router.setBaseUrl(baseUrl);
 ```
 This works globally, so you only need to set it once. In the main routing file perhaps?
@@ -151,7 +169,7 @@ This works globally, so you only need to set it once. In the main routing file p
 After that you can call `absoluteUrlFor` anywhere.
 
 Example:
-```
+```js
 router.setBaseUrl('https://www.cermati.com');
 
 // Returns https://www.cermati.com/articles/cool-guy
@@ -161,7 +179,7 @@ router.urlFor('article.detail', {title: 'cool-guy'});
 ### getRouteTable
 
 After `buildRouteTable`, you can call this anywhere using route-label (with or without wrapping app).
-```
+```js
 /*
 Consider this route definitions:
   'article.list' => '/articles'
@@ -171,7 +189,7 @@ Consider this route definitions:
 router.getRouteTable();
 ```
 Will return:
-```
+```js
 {
   'article.list': '/articles'
   'article.detail': '/articles/:title'
