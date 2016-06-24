@@ -1,7 +1,7 @@
 {
   "name": "route-label",
   "version": "0.0.6",
-  "description": "Named router and URL generator, compatible with express 4 routing",
+  "description": "Named router and URL generator, compatible with Express 4 modular routing",
   "main": "index.js",
   "scripts": {
     "test": "mocha --timeout 10000 $(find tests -name *.spec.js)"
@@ -19,7 +19,8 @@
     "url generator",
     "express 4 router",
     "express router",
-    "router module"
+    "router module",
+    "module"
   ],
   "author": "William Gozali <will.gozali@cermati.com>",
   "license": "MIT",
