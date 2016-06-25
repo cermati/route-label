@@ -11,6 +11,10 @@ var routeHelper = require('../helper');
 describe('router/helper.js', function () {
   describe('.isValidName()', function () {
     context('when given valid name', function () {
+      it('should return true for empty string', function () {
+        expect(routeHelper.isValidName('')).to.be.true;
+      });
+      
       it('should return true for single word', function () {
         expect(routeHelper.isValidName('word')).to.be.true;
       });
@@ -27,8 +31,7 @@ describe('router/helper.js', function () {
     });
 
     context('when given invalid name', function () {
-      it('should return false for falsy name', function () {
-        expect(routeHelper.isValidName('')).to.be.false;
+      it('should return false for null/undefined name', function () {
         expect(routeHelper.isValidName(null)).to.be.false;
         expect(routeHelper.isValidName(undefined)).to.be.false;
       });
@@ -134,6 +137,35 @@ describe('router/helper.js', function () {
         expect(routeHelper.buildPath(['/simple', '/'])).to.equal('/simple');
         expect(routeHelper.buildPath(['/deep', '/', '/', '/nested'])).to.equal('/deep/nested');
         expect(routeHelper.buildPath(['/ham', '/', '/bur', '/', '/ger'])).to.equal('/ham/bur/ger');
+      });
+    });
+  });
+
+  describe('.buildName()', function () {
+    context('when given simple name', function () {
+      it('should return valid name', function () {
+        expect(routeHelper.buildName(['jon'])).to.equal('jon');
+        expect(routeHelper.buildName(['cat.dog'])).to.equal('cat.dog');
+        expect(routeHelper.buildName(['get.gold.dog'])).to.equal('get.gold.dog');
+      });
+    });
+
+    context('when given name from multilevel route', function () {
+      it('should return valid name', function () {
+        expect(routeHelper.buildName(['simple', 'item'])).to.equal('simple.item');
+        expect(routeHelper.buildName(['simple.name', 'item'])).to.equal('simple.name.item');
+        expect(routeHelper.buildName(['simple', 'coupled.token', 'wow'])).to.equal('simple.coupled.token.wow');
+      });
+    });
+
+    context('when given name which contains empty', function () {
+      it('should return valid name', function () {
+        expect(routeHelper.buildName([''])).to.equal('');
+        expect(routeHelper.buildName(['', ''])).to.equal('');
+        expect(routeHelper.buildName(['', 'wow'])).to.equal('wow');
+        expect(routeHelper.buildName(['simple', ''])).to.equal('simple');
+        expect(routeHelper.buildName(['deep', '', '', 'nested'])).to.equal('deep.nested');
+        expect(routeHelper.buildName(['ham', '', 'bur', '', 'ger'])).to.equal('ham.bur.ger');
       });
     });
   });

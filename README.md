@@ -79,7 +79,7 @@ router.METHOD([name,] path, [middleware ...,] lastMiddleware);
 
 `name` is optional. If provided, this route will be registered in the route table and you can generate its URL using `urlFor`.
 
-`name` may contain alphanumeric, dot, dashes, and underscore.
+It may contain alphanumeric, dot, dashes, and underscore.
 
 `METHOD` is the router's method, such as `get`, `post`, `put`, `all`, or `use`.
 
@@ -105,6 +105,7 @@ router.buildRouteTable();
 ### Mounting Submodule
 
 If you mount another "submodule" with `use` keyword, the given name will become prefix for all routes inside that submodule.
+Without giving name, the nested routes inside the submodule won't be registered as named route.
 Prefixes will be concatenated with dot ('.') character. It is also possible to have subsubmodule and subsubsubmodule.
 
 Example, in your `/routes/index.js`:
@@ -117,6 +118,16 @@ In `/path/to/module/article/index.js`:
 router.get('list', '/', require('/path/to/module/article/controller/...'));
 router.post('detail', '/:title', require('/path/to/module/article/controller/...'));
 ```
+
+Now you get 'article.list' and 'article.detail' routes defined.
+
+If you provide empty string as names, they will be ignored in the prefix.
+For example, if we do this:
+```
+router.use('', '/articles', require('/path/to/module/article');
+```
+
+We get 'list' and 'detail' routes defined, instead of '.list' and '.detail'
 
 ### Using Wildcard
 

@@ -6,12 +6,16 @@ var self = exports;
 /**
  * Check if a part of route name is valid or not
  * A valid name consists of alphanumerics, dots, dashes, and underscores
+ * It may be empty
  * @author William Gozali <will.gozali@cermati.com>
  * @param name
  */
 exports.isValidName = function (name) {
   if (typeof name !== 'string') {
     return false;
+  }
+  if (name == '') {
+    return true;
   }
   return name.match(/^[-_.a-zA-Z0-9]+$/) !== null;
 };
@@ -79,6 +83,29 @@ exports.buildPath = function (pathHierarchy) {
 };
 
 /**
+ * Joins name hierarchy to a single name
+ * @author William Gozali <will.gozali@cermati.com>
+ * @example
+ * buildName(['']) => ''
+ * buildName(['', 'dog', 'cat']) => 'dog.cat'
+ * buildName(['cat.dot', 'doge'']) => 'cat.dog.doge'
+ * buildName(['cat', '', '', 'the', 'ring']) => 'cat.the.ring'
+ */
+exports.buildName = function (pathHierarchy) {
+  var emptyIgnored = [];
+  pathHierarchy.forEach(function (path) {
+    if (path !== '') {
+      emptyIgnored.push(path);
+    }
+  });
+
+  var cleanNameHierarchy = emptyIgnored;
+  if (cleanNameHierarchy.length === 0) {
+    cleanNameHierarchy = [''];
+  }
+  return cleanNameHierarchy.join('.');
+};
+/**
  * Converts routeTable[NAME].tokens to human readable string, used for logging purpose
  * @author William Gozali <will.gozali@cermati.com>*
  * @example
@@ -99,7 +126,7 @@ exports.tokensToString = function (tokens) {
  * @author William Gozali <will.gozali@cermati.com>
  */
 exports.register = function (routeTable, nameHierarchy, pathHierarchy) {
-  var name = nameHierarchy.join('.');
+  var name = self.buildName(nameHierarchy);
   var pattern = self.buildPath(pathHierarchy);
 
   if (routeTable[name] && (pattern !== routeTable[name].pattern)) {
