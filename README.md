@@ -123,7 +123,7 @@ Now you get 'article.list' and 'article.detail' routes defined.
 
 If you provide empty string as names, they will be ignored in the prefix.
 For example, if we do this:
-```
+```js
 router.use('', '/articles', require('/path/to/module/article');
 ```
 
