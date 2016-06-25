@@ -151,7 +151,7 @@ function add() {
   }
 
   // Prepare to get deeper
-  if (name) {
+  if (typeof name == 'string') {
     app.routeTraversal.push({
       operation: PUSH,
       name: name,
@@ -176,7 +176,7 @@ function add() {
   }
 
   // Finished this stack, prepare to backtrack
-  if (name) {
+  if (typeof name == 'string') {
     app.routeTraversal.push({
       operation: POP,
       name: name,

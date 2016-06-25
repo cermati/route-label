@@ -98,7 +98,7 @@ describe('router/index.js', function () {
     var POP;
 
     before('get push and pop constant', function () {
-      var constants = require('..//constants');
+      var constants = require('../constants');
       PUSH = constants.PUSH;
       POP = constants.POP;
     });
