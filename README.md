@@ -48,16 +48,27 @@ router.post('detail', '/:title', require('/path/to/module/article/controller/...
 
 You can:
 ```js
-router.urlFor('user.detail', {id: 0})                  -> /users/0
-router.urlFor('user.edit', {id: 2})                    -> /users/2/edit
-router.urlFor('article.list')                          -> /articles
-router.urlFor('article.detail', {title: 'love-craft'}) -> /articles/love-craft
+router.urlFor('user.detail', {id: 0})                  -> '/users/0'
+router.urlFor('user.edit', {id: 2})                    -> '/users/2/edit'
+router.urlFor('article.list')                          -> '/articles'
+router.urlFor('article.detail', {title: 'love-craft'}) -> '/articles/love-craft'
 ```
 
 # Why
 
-1. No need to remember the URL patterns, just the URL's name.
-2. Easy to change URL patterns, just in the definition.
+Define route in a way you define constants (name => route), because:
+1. No need to remember the route's URL patterns, just the name to generate URL. Useful for large application with many end points.
+2. Easy to change URL patterns, just in the "constant" definition.
+
+# Features
+
+There are other named route libraries around, with different strengths. Here are this one's:
+
+1. Define route as natural as Express' way.
+2. Mount submodule routes using `use` method, and get the whole route names respect the module - submodule structure by namespaces.
+3. You still can apply middlewares in multiple lines flexibly.
+4. You can get and read the route table and decide what to do with it: pass to front end, finding route name based on pattern, etc.
+5. Zero dependency :)
 
 # How to use
 
@@ -122,7 +133,7 @@ router.post('detail', '/:title', require('/path/to/module/article/controller/...
 Now you get 'article.list' and 'article.detail' routes defined.
 
 If you provide empty string as names, they will be ignored in the prefix.
-For example, if we do this:
+For example, if you did this:
 ```js
 router.use('', '/articles', require('/path/to/module/article');
 ```
@@ -224,11 +235,17 @@ Will return:
 
 # FAQ
 
-Is it optimized?
-> Yes, we tried our best to optimize the route generation so it runs as fast as possible
+Has anyone used this on production server?
+> Yes, the birthplace of this library, [cermati](https://cermati.com/), and our other projects using Node.js. We have this on production server running since October 2015.
+
+Why bother creating this library?
+> We reviewed other libraries for named route, but none of them suites our needs for submodule routing. So we decided to build our own solution. Battle tested in production, we proceed to release this as open source.
 
 How does it work internally?
-> It wraps Express' routing, attaching name in the routes. When .buildRouteTable is called, the attached names are traversed in pre-order fashion. The result is stored in table. 
+> It wraps Express' routing, attaching name in the routes before calling actual Express' routing function. When `.buildRouteTable` is called, the attached names are traversed in pre-order fashion. The result is stored in table and used for future URL generation.
+
+Is it optimized?
+> Yes, we tried our best to optimize and focus on the URL generation so it runs as fast as possible. This is done by precomputing as much as possible during route table creation, ensuring URL generation only do the feather weights.
 
 Can it be used as template helper?
 > You can, if the template engine allow creation of custom helper. For example in Handlebars.js, you can define custom helper which calls `urlFor`.
