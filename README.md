@@ -68,7 +68,7 @@ There are other named route libraries around, with different strengths. Here are
 1. Define route as natural as Express' way.
 2. Mount submodule routes using `use` method, and get the whole route names respect the module - submodule structure by namespaces.
 3. You still can apply middlewares in multiple lines flexibly.
-4. Get the route table and decide what to do with it: pass to front end, finding route name based on pattern, etc.
+4. Get the route table and you can decide what to do with it: pass to front end, finding route name based on pattern, etc.
 5. Zero dependency :)
 
 # How to use
@@ -243,7 +243,7 @@ Will return:
 # FAQ
 
 Has anyone used this on production server?
-> Yes, the birthplace of this library, [cermati](https://cermati.com/), and our other projects using Node.js. We have this on production server running since October 2015.
+> Yes, the birthplace of this library, [Cermati](https://cermati.com/), and our other projects using Node.js. We have this on production server running since October 2015.
 
 Why bother creating this library?
 > We reviewed other libraries for named route, but none of them suites our needs, especially for submodule routing. So we decided to build our own solution. Battle tested in production, we proceed to release this as open source.
