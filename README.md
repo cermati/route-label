@@ -24,26 +24,26 @@ router.urlFor(<name>, <params>);
 Either:
 ```js
 // In index.js
-router.get('user.detail', '/users/:id', require('/path/to/controller/...'));
-router.post('user.edit', '/users/:id/edit', require('/path/to/controller/...'));
+router.get('user.detail', '/users/:id', userDetailController);
+router.post('user.edit', '/users/:id/edit', userEditController);
 
-router.get('article.list', '/articles', require('/path/to/controller/...'));
-router.get('article.detail', '/articles/:title', require('/path/to/controller/...'));
+router.get('article.list', '/articles', articleListController);
+router.get('article.detail', '/articles/:title', articleDetailController);
 ```
 
 or:
 ```js
 // In index.js
-router.use('user', '/users', require('/path/to/module/user');
-router.use('article', '/articles', require('/path/to/module/post');
+router.use('user', '/users', userRouter);
+router.use('article', '/articles', articleRouter);
 
 // In path/to/module/user/index.js
-router.get('detail', '/:id', require('/path/to/module/user/controller/...'));
-router.post('edit', '/:id/edit', require('/path/to/module/user/controller/...'));
+userRuter.get('detail', '/:id', detailController);
+userRouter.post('edit', '/:id/edit', editController);
 
 // In path/to/module/article/index.js
-router.get('list', '/', require('/path/to/module/article/controller/...'));
-router.post('detail', '/:title', require('/path/to/module/article/controller/...'));
+articleRouter.get('list', '/', listController);
+articleRouter.get('detail', '/:title', detailController);
 ```
 
 You can:
@@ -113,9 +113,9 @@ Example:
 ```js
 var router = require('route-label')(app);
 
-router.all('/*', require('/path/to/middleware/...'));
-router.get('user.detail', '/users/:id', require('/path/to/controller/...'));
-router.post('user.edit', '/users/:id/edit', require('/path/to/controller/...'));
+router.all('/*', middleware);
+router.get('user.detail', '/users/:id', userDetailController);
+router.post('user.edit', '/users/:id/edit', userEditController);
 
 router.buildRouteTable();
 ```
@@ -128,13 +128,13 @@ Prefixes will be concatenated with dot ('.') character. It is also possible to h
 
 Example, in your `/routes/index.js`:
 ```js
-router.use('article', '/articles', require('/path/to/module/article');
+router.use('article', '/articles', articleModule);
 ```
 
 In `/path/to/module/article/index.js`:
 ```js
-router.get('list', '/', require('/path/to/module/article/controller/...'));
-router.post('detail', '/:title', require('/path/to/module/article/controller/...'));
+router.get('list', '/', listController);
+router.post('detail', '/:title', detailController);
 ```
 
 Now you get 'article.list' and 'article.detail' routes defined.
@@ -142,7 +142,7 @@ Now you get 'article.list' and 'article.detail' routes defined.
 If you provide empty string as names, they will be ignored in the prefix.
 For example, if you did this:
 ```js
-router.use('', '/articles', require('/path/to/module/article');
+router.use('', '/articles', articleModule);
 ```
 
 We get 'list' and 'detail' routes defined, instead of '.list' and '.detail'
@@ -153,14 +153,14 @@ You can't use wildcard for named router, because generating its URL sounds weird
 Consider:
 ```js
 // Can't!
-router.get('sample', '/sample/*/text', require('/path/to/controller/...'));
+router.get('sample', '/sample/*/text', controller);
 ```
 It is not clear what `urlFor('sample')` should return. 
 
 As you probably need this pattern for middleware, simply skip the `name` parameter.
 ```js
 // OK!
-router.get('/sample/*/text', require('/path/to/controller/...'));
+router.get('/sample/*/text', controller);
 ```
 
 ## Generate URL
