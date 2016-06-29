@@ -1,6 +1,6 @@
 {
   "name": "route-label",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "Named router and URL generator, compatible with Express 4 modular routing",
   "main": "index.js",
   "scripts": {
