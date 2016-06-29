@@ -76,7 +76,7 @@ There are other named route libraries around, with different strengths. Here are
 ## Installing
 
 ```
-npm install route-label
+npm install --save route-label
 ```
 
 ## Registering Routes
