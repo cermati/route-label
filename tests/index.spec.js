@@ -270,6 +270,14 @@ describe('router/index.js', function () {
         pattern: '/foo/:input/bun/:input',
         tokens: [{text: ''}, {text: 'foo'}, {text: 'input', input: true}, {text: 'bun'}, {text: 'input', input: true}]
       };
+      routeTable['flights.fromto'] = {
+        pattern: '/flights/:from-:to',
+        tokens: [{text: ''}, {text: 'flights'}, {text: 'from', input: true}, {text: '-'}, {text: 'to', input: true}]
+      };
+      routeTable['flights.number'] = {
+        pattern: '/flights/num-:number(\\d+)',
+        tokens: [{text: ''}, {text: 'flights'}, {text: 'num-'}, {text: 'code', input: true}]
+      };
 
       revert = router.__set__('routeTable', routeTable);
       urlFor = router.urlFor;
@@ -343,6 +351,20 @@ describe('router/index.js', function () {
 
         expect(function () {
           urlFor('foo.list-category', {category: undefined});
+        }).to.throw(Error);
+      });
+    });
+
+    context('when given path with regexes', function () {
+      it('should return correct path', function () {
+        expect(urlFor('flights.fromto', {from: 'CGK', to: 'DPS'})).to.equal('/flights/CGK-DPS');
+      });
+      it('should return correct path when params have digit regex', function () {
+        expect(urlFor('flights.number', {number: 30})).to.equal('/flights/num-30');
+      });
+      it('should return error when params have digit regex but given string', function () {
+        expect(function () {
+          urlFor('flights.number', {number: 'test'})
         }).to.throw(Error);
       });
     });
