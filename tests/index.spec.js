@@ -93,6 +93,42 @@ describe('router/index.js', function () {
     });
   });
 
+  describe('check path with regex use real express app', function () {
+    var express = require('express');
+    var expressApp = express();
+    var sampleMiddleware;
+    var router;
+    var useSpy;
+
+    before('register express app', function () {
+      useSpy = sinon.spy(expressApp, 'use');
+      router = require('../index')(expressApp);
+    });
+
+    before('register test middleware', function () {
+      sampleMiddleware = function (req, res, next) {
+        return next();
+      };
+    });
+
+    context('register paths that contain regex', function () {
+      it('should accept valid pattern', function () {
+        expect(function () {
+          // See https://expressjs.com/en/guide/routing.html
+          router.use(/.*fly?/, sampleMiddleware)
+        }).to.not.throw(Error);
+        expect(useSpy).to.have.been.calledWith(/.*fly?/, [sampleMiddleware]);
+      });
+      it('should throw error for invalid pattern', function () {
+        expect(function () {
+          // See https://github.com/expressjs/express/issues/2034
+          router.use('/video/:alias?/(category/:category)?/', sampleMiddleware);
+        }).to.throw(Error);
+        expect(useSpy).to.have.been.calledWith('/video/:alias?/(category/:category)?/', [sampleMiddleware]);
+      });
+    });
+  });
+
   describe('.buildRouteTable()', function () {
     var PUSH;
     var POP;
