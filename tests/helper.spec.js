@@ -42,58 +42,6 @@ describe('router/helper.js', function () {
     });
   });
 
-  describe('.isValidPathForNamedRoute()', function () {
-    context('when given valid path', function () {
-      it('should return true for root', function () {
-        expect(routeHelper.isValidPathForNamedRoute('/')).to.be.true;
-      });
-
-      it('should return true for usual path', function () {
-        expect(routeHelper.isValidPathForNamedRoute('/path')).to.be.true;
-        expect(routeHelper.isValidPathForNamedRoute('/with/number/12/wow')).to.be.true;
-        expect(routeHelper.isValidPathForNamedRoute('/with-dash')).to.be.true;
-        expect(routeHelper.isValidPathForNamedRoute('/with_underscore')).to.be.true;
-        expect(routeHelper.isValidPathForNamedRoute('/CAPITAL')).to.be.true;
-        expect(routeHelper.isValidPathForNamedRoute('/MixEd')).to.be.true;
-        expect(routeHelper.isValidPathForNamedRoute('/more/than/one')).to.be.true;
-        expect(routeHelper.isValidPathForNamedRoute('/with/:input')).to.be.true;
-        expect(routeHelper.isValidPathForNamedRoute('/with/:more/:input')).to.be.true;
-        expect(routeHelper.isValidPathForNamedRoute('/bun/:meat/bun/:cheese/bun')).to.be.true;
-        expect(routeHelper.isValidPathForNamedRoute('/can/have/:input/and/:input/again')).to.be.true;
-        expect(routeHelper.isValidPathForNamedRoute('/with-extension.xml')).to.be.true;
-      });
-    });
-
-    context('when given invalid path', function () {
-      it('should return false for falsy path', function () {
-        expect(routeHelper.isValidPathForNamedRoute('')).to.be.false;
-        expect(routeHelper.isValidPathForNamedRoute(undefined)).to.be.false;
-        expect(routeHelper.isValidPathForNamedRoute(null)).to.be.false;
-      });
-
-      it('should return false for malformed path', function () {
-        expect(routeHelper.isValidPathForNamedRoute('//')).to.be.false;
-        expect(routeHelper.isValidPathForNamedRoute('no-slash')).to.be.false;
-        expect(routeHelper.isValidPathForNamedRoute('/slash-in-the/end/')).to.be.false;
-        expect(routeHelper.isValidPathForNamedRoute('//multiple//slash')).to.be.false;
-        expect(routeHelper.isValidPathForNamedRoute('/contains space')).to.be.false;
-      });
-
-      it('should return false for malformed input token', function () {
-        expect(routeHelper.isValidPathForNamedRoute('/:colon:again')).to.be.false;
-        expect(routeHelper.isValidPathForNamedRoute('/no-name/:')).to.be.false;
-      });
-
-      it('should return false for path with non alphanumeric characters, dash, or underscore', function () {
-        expect(routeHelper.isValidPathForNamedRoute('/wildcard*')).to.be.false;
-        expect(routeHelper.isValidPathForNamedRoute('/another/wildcard*')).to.be.false;
-        expect(routeHelper.isValidPathForNamedRoute('/wildcard*/in/middle')).to.be.false;
-        expect(routeHelper.isValidPathForNamedRoute('/much/(wow)+')).to.be.false;
-        expect(routeHelper.isValidPathForNamedRoute('/mega?/\w+/r?gex')).to.be.false;
-      });
-    });
-  });
-
   describe('.toToken()', function () {
     context('when given non input field', function () {
       it('should return just text', function () {
