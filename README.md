@@ -69,7 +69,6 @@ There are other named route libraries around, with different strengths. Here are
 2. Mount submodule routes using `use` method, and get the whole route names respect the module - submodule structure by namespaces.
 3. You still can apply middlewares in multiple lines flexibly.
 4. Get the route table and you can decide what to do with it: pass to front end, finding route name based on pattern, etc.
-5. Zero dependency :)
 
 # How to use
 
@@ -146,22 +145,6 @@ router.use('', '/articles', articleModule);
 ```
 
 We get 'list' and 'detail' routes defined, instead of '.list' and '.detail'
-
-### Using Wildcard
-
-You can't use wildcard for named router, because generating its URL sounds weird.
-Consider:
-```js
-// Can't!
-router.get('sample', '/sample/*/text', controller);
-```
-It is not clear what `urlFor('sample')` should return. 
-
-As you probably need this pattern for middleware, simply skip the `name` parameter.
-```js
-// OK!
-router.get('/sample/*/text', controller);
-```
 
 ## Generate URL
 
@@ -250,9 +233,6 @@ Why bother creating this library?
 
 How does it work internally?
 > It wraps Express' routing, attaching name in the routes before calling actual Express' routing function. When `.buildRouteTable` is called, the attached names are traversed in pre-order fashion. The result is stored in table and used for future URL generation.
-
-Is it optimized?
-> Yes, we tried our best to optimize and focus on the URL generation so it runs as fast as possible. This is done by precomputing as much as possible during route table creation, ensuring URL generation only do the feather weights.
 
 Can it be used as template helper?
 > You can, if the template engine allow creation of custom helper. For example in Handlebars.js, you can define custom helper which calls `urlFor`.
