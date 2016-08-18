@@ -24,9 +24,12 @@
   ],
   "author": "William Gozali <will.gozali@cermati.com>",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "path-to-regexp": "~1.5.3"
+  },
   "devDependencies": {
     "chai": "~3.5.0",
+    "express": "~4.14.0",
     "mocha": "~2.5.3",
     "rewire": "~2.5.1",
     "sinon": "~1.17.4",

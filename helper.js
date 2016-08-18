@@ -21,24 +21,6 @@ exports.isValidName = function (name) {
 };
 
 /**
- * Check if a route path is valid or not
- * A valid path is:
- *   '/', or
- *   '/token_1/token_2/.../token_n', where token_i consists of alphanumerics, dashes, or underscores
- * @author William Gozali <will.gozali@cermati.com>
- * @param path
- */
-exports.isValidPathForNamedRoute = function (path) {
-  if (typeof path != 'string') {
-    return false;
-  }
-  if (path === '/') {
-    return true;
-  }
-  return path.match(/^(\/:?[-_.a-zA-Z0-9]+)+$/) !== null;
-};
-
-/**
  * Convert given "slice of pattern" to token which is easier to use
  * @author William Gozali <will.gozali@cermati.com>
  * @example
@@ -131,9 +113,6 @@ exports.register = function (routeTable, nameHierarchy, pathHierarchy) {
 
   if (routeTable[name] && (pattern !== routeTable[name].pattern)) {
     throw new Error('There are duplicates in route name: ' + name);
-  }
-  if (!self.isValidPathForNamedRoute(pattern)) {
-    throw new Error('Generated pattern is malformed, check the routing implementation: ' + pattern);
   }
 
   routeTable[name] = {

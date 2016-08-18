@@ -93,6 +93,42 @@ describe('router/index.js', function () {
     });
   });
 
+  describe('check path with regex use real express app', function () {
+    var express = require('express');
+    var expressApp = express();
+    var sampleMiddleware;
+    var router;
+    var useSpy;
+
+    before('register express app', function () {
+      useSpy = sinon.spy(expressApp, 'use');
+      router = require('../index')(expressApp);
+    });
+
+    before('register test middleware', function () {
+      sampleMiddleware = function (req, res, next) {
+        return next();
+      };
+    });
+
+    context('register paths that contain regex', function () {
+      it('should accept valid pattern', function () {
+        expect(function () {
+          // See https://expressjs.com/en/guide/routing.html
+          router.use(/.*fly?/, sampleMiddleware)
+        }).to.not.throw(Error);
+        expect(useSpy).to.have.been.calledWith(/.*fly?/, [sampleMiddleware]);
+      });
+      it('should throw error for invalid pattern', function () {
+        expect(function () {
+          // See https://github.com/expressjs/express/issues/2034
+          router.use('/video/:alias?/(category/:category)?/', sampleMiddleware);
+        }).to.throw(Error);
+        expect(useSpy).to.have.been.calledWith('/video/:alias?/(category/:category)?/', [sampleMiddleware]);
+      });
+    });
+  });
+
   describe('.buildRouteTable()', function () {
     var PUSH;
     var POP;
@@ -270,6 +306,14 @@ describe('router/index.js', function () {
         pattern: '/foo/:input/bun/:input',
         tokens: [{text: ''}, {text: 'foo'}, {text: 'input', input: true}, {text: 'bun'}, {text: 'input', input: true}]
       };
+      routeTable['flights.fromto'] = {
+        pattern: '/flights/:from-:to',
+        tokens: [{text: ''}, {text: 'flights'}, {text: 'from', input: true}, {text: '-'}, {text: 'to', input: true}]
+      };
+      routeTable['flights.number'] = {
+        pattern: '/flights/num-:number(\\d+)',
+        tokens: [{text: ''}, {text: 'flights'}, {text: 'num-'}, {text: 'code', input: true}]
+      };
 
       revert = router.__set__('routeTable', routeTable);
       urlFor = router.urlFor;
@@ -343,6 +387,20 @@ describe('router/index.js', function () {
 
         expect(function () {
           urlFor('foo.list-category', {category: undefined});
+        }).to.throw(Error);
+      });
+    });
+
+    context('when given path with regexes', function () {
+      it('should return correct path', function () {
+        expect(urlFor('flights.fromto', {from: 'CGK', to: 'DPS'})).to.equal('/flights/CGK-DPS');
+      });
+      it('should return correct path when params have digit regex', function () {
+        expect(urlFor('flights.number', {number: 30})).to.equal('/flights/num-30');
+      });
+      it('should return error when params have digit regex but given string', function () {
+        expect(function () {
+          urlFor('flights.number', {number: 'test'})
         }).to.throw(Error);
       });
     });

@@ -24,6 +24,8 @@ var util = require('util');
 var helper = require('./helper');
 var constants = require('./constants');
 
+var pathToRegexp = require('path-to-regexp');
+
 var baseUrl;
 var routeTable;
 var PUSH = constants.PUSH;
@@ -134,9 +136,6 @@ function add() {
 
     if (!helper.isValidName(name)) {
       throw new Error('Invalid route name: ' + name);
-    }
-    if (!helper.isValidPathForNamedRoute(path)) {
-      throw new Error('Invalid path for named route: ' + path + ', it won\'t make sense for urlFor');
     }
   } else {
     // No name provided
@@ -293,27 +292,12 @@ function urlFor(routeName, params, queries) {
     throw new Error('Attempted to use undefined routeName: ' + routeName);
   }
 
-  var url = routeTable[routeName].tokens.map(function (token) {
-    var filledToken;
-
-    if (!token.input) {
-      filledToken = token.text;
-    } else {
-      var param = params[token.text];
-      if ((param === undefined) || (param === null) || (param === '')) {
-        var message = util.format('Incomplete parameter for pattern: %s = %s', routeTable[routeName].pattern, token.text);
-        throw new Error(message);
-      }
-      filledToken = params[token.text];
-    }
-
-    return filledToken;
-  }).join('/');
+  var toPath = pathToRegexp.compile(routeTable[routeName].pattern);
+  var url= toPath(params);
 
   if (queries) {
     url = util.format('%s?%s', url, querystring.stringify(queries));
   }
-
   return url;
 }
 
