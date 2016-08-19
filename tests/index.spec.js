@@ -246,7 +246,12 @@ describe('router/index.js', function () {
           {operation: PUSH, name: '3', path: '/3'},
           {operation: POP, name: '3', path: '/3'},
           {operation: POP, name: '2', path: '/2'},
-          {operation: POP, name: '1', path: '/1'}
+          {operation: POP, name: '1', path: '/1'},
+
+          {operation: PUSH, name: 'reg', path: '/reg'},
+          {operation: PUSH, name: 'all', path: '/*'},
+          {operation: POP, name: 'all', path: '/*'},
+          {operation: POP, name: 'reg', path: '/reg'}
         ];
 
         router.buildRouteTable();
@@ -268,8 +273,36 @@ describe('router/index.js', function () {
         expect(routeTable['1.1-end'].pattern).to.equal('/1/end');
         expect(routeTable['1.1-bypass.3'].pattern).to.equal('/1/3');
         expect(routeTable['1.2.3'].pattern).to.equal('/1/2/3');
+
+        expect(routeTable['reg.all'].pattern).to.equal('/reg/*');
       });
     });
+  });
+
+  describe('.addMapping()', function () {
+    var router;
+    var routeTable;
+
+    before('initialize router & build route table', function () {
+      var app = {};
+      var wiredRouter = rewire('../index');
+      router = wiredRouter(app);
+
+      router.addMapping('reg.all', '/reg/*');
+      router.addMapping('reg.product', '/reg/:id');
+      router.addMapping('reg.product.all', '/reg/:id/*');
+
+      router.buildRouteTable();
+      routeTable = router.getRouteTable();
+    });
+
+    context('routes should be registered', function () {
+      it('should registered routes', function () {
+        expect(routeTable['reg.all']).to.equal('/reg/*');
+        expect(routeTable['reg.product']).to.equal('/reg/:id');
+        expect(routeTable['reg.product.all']).to.equal('/reg/:id/*');
+      });
+    })
   });
 
   describe('.urlFor()', function () {

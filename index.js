@@ -61,6 +61,9 @@ var routerBase = {
  *   router.get('list', '/', require('./views/list'));
  *   router.get('detail', '/:title', require('./views/detail'));
  *   router.post('save', '/:title', middleware.requireAdmin, require('./views/save')); // Can add middleware
+ *
+ *   or we can just register name without middleware to route:
+ *   router.addMapping('route.all', /route/*);
  */
 var router = function (app) {
   // Inherit other method from app
@@ -81,6 +84,7 @@ var router = function (app) {
   // Extend with additional functions
   router.use = add.bind(null, 'use', app);
   router.all = add.bind(null, 'all', app);
+  router.addMapping = add.bind(null, null, app);
   router.buildRouteTable = buildRouteTable.bind(null, app);
 
   return router;
@@ -158,19 +162,22 @@ function add() {
     });
   }
 
-  // Register this for express to do its stuff
-  app[method](path, middlewares);
+  // Method will be null if we use addMapping()
+  if (method) {
+    // Register this for express to do its stuff
+    app[method](path, middlewares);
 
-  var routeController = middlewares[middlewares.length - 1];
-  if (Array.isArray(routeController.routeTraversal)) {
-    /*
-     As with our function signature, the last element of the middlewares is assumed to be
-     the "handler" for the controller logic.
-     Even if it is not (could be just a middleware for login guard), then routeController.routeTraversal
-     is guaranteed to be undefined, it won't even enter this loop
-     */
-    for (var i = 0; i < routeController.routeTraversal.length; i++) {
-      app.routeTraversal.push(routeController.routeTraversal[i]);
+    var routeController = middlewares[middlewares.length - 1];
+    if (Array.isArray(routeController.routeTraversal)) {
+      /*
+       As with our function signature, the last element of the middlewares is assumed to be
+       the "handler" for the controller logic.
+       Even if it is not (could be just a middleware for login guard), then routeController.routeTraversal
+       is guaranteed to be undefined, it won't even enter this loop
+       */
+      for (var i = 0; i < routeController.routeTraversal.length; i++) {
+        app.routeTraversal.push(routeController.routeTraversal[i]);
+      }
     }
   }
 
