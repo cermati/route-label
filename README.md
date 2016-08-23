@@ -82,7 +82,7 @@ npm install --save route-label
 
 ### Basic
 
-In this explanation, `app` refers to `express()` instance.
+In this explanation, `app` refers to `express()` instance, while appRouter refers to any `express.Router()`` instance.
 
 For every route definition file, wrap the app instance with this library:
 ```js
@@ -127,13 +127,21 @@ Prefixes will be concatenated with dot ('.') character. It is also possible to h
 
 Example, in your `/routes/index.js`:
 ```js
-router.use('article', '/articles', articleModule);
+var app = require('express')();
+var router = require('route-label')(app);
+
+router.use('article', '/articles', require('/path/to/module/article/index'));
 ```
 
 In `/path/to/module/article/index.js`:
 ```js
+var appRouter = require('express').Router(); // Use express.Router() instead of express()
+var router = require('route-label')(appRouter);
+
 router.get('list', '/', listController);
 router.post('detail', '/:title', detailController);
+
+module.exports = router;
 ```
 
 Now you get 'article.list' and 'article.detail' routes defined.
