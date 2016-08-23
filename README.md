@@ -4,20 +4,8 @@
 # What
 
 Register your route as natural as Express' way, PLUS adding name/label to it.
-```js
-router.get(<name>, <pattern>, <middleware/controller>);
-router.put(<name>, <pattern>, <middleware/controller>);
-router.post(<name>, <pattern>, <middleware/controller>);
-// Etc...
 
-// When using `use`, name will become prefix for routes inside the mounted module
-router.use(<name>, <pattern>, <module>);
-```
-
-Then generating your URL is as easy as calling `urlFor`:
-```js
-router.urlFor(<name>, <params>);
-```
+Then you can generate URL by calling `urlFor`.
 
 # Quick Example
 
@@ -38,7 +26,7 @@ router.use('user', '/users', userRouter);
 router.use('article', '/articles', articleRouter);
 
 // In path/to/module/user/index.js
-userRuter.get('detail', '/:id', detailController);
+userRouter.get('detail', '/:id', detailController);
 userRouter.post('edit', '/:id/edit', editController);
 
 // In path/to/module/article/index.js
@@ -54,6 +42,10 @@ router.urlFor('article.list')                          -> '/articles'
 router.urlFor('article.detail', {title: 'love-craft'}) -> '/articles/love-craft'
 ```
 
+# Sample Project
+
+See [route-label-sample](https://github.com/cermati/route-label-sample) for sample integration on express.js. 
+
 # Why
 
 Define route in a way you define constants (name => route), because:
@@ -62,8 +54,6 @@ Define route in a way you define constants (name => route), because:
 2. Easy to change URL patterns, just in the "constant" definition.
 
 # Features
-
-There are other named route libraries around, with different strengths. Here are this one's:
 
 1. Define route as natural as Express' way.
 2. Mount submodule routes using `use` method, and get the whole route names respect the module - submodule structure by namespaces.
@@ -82,10 +72,9 @@ npm install --save route-label
 
 ### Basic
 
-In this explanation, `app` refers to `express()` instance, while appRouter refers to any `express.Router()`` instance.
-
-For every route definition file, wrap the app instance with this library:
+In the top level express app, wrap the express or express.Router instance with this library:
 ```js
+var app = require('express')();
 var router = require('route-label')(app);
 ```
 
