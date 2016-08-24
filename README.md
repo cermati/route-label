@@ -4,10 +4,9 @@
 # What
 
 Register your route as natural as Express' way, PLUS adding name/label to it.
-
 Then you can generate URL by calling `urlFor`.
 
-# Quick Example
+# Example
 
 Either:
 ```js
@@ -130,7 +129,7 @@ var router = require('route-label')(appRouter);
 router.get('list', '/', listController);
 router.post('detail', '/:title', detailController);
 
-module.exports = router;
+module.exports = appRouter; // Return the express.Router() instance
 ```
 
 Now you get 'article.list' and 'article.detail' routes defined.
